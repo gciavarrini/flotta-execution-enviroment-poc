@@ -1,0 +1,32 @@
+apiVersion: management.project-flotta.io/v1alpha1
+kind: EdgeWorkload
+metadata:
+  name: ee-workload
+spec:
+  deviceSelector:
+    matchLabels:
+      app: ee-ansible
+  type: pod
+  pod:
+    spec:
+      containers:
+        - name: ee-worload-container
+          image: quay.io/ansible/ansible-runner:stable-2.12-latest
+          securityContext:
+            privileged: true
+          env:
+           # Define the environment variable
+           - name: RUNNER_PLAYBOOK
+             valueFrom:
+               configMapKeyRef:
+                 name: ee-configmap-env
+                 key: path
+
+          volumeMounts:
+            - name: myvol
+              mountPath: /workloadDir
+      volumes:
+        - name: myvol
+          hostPath:
+            path: /var/home/flotta/volumeDir
+            type: DirectoryOrCreate
